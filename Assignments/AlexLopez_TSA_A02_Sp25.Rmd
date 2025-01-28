@@ -22,6 +22,14 @@ R packages needed for this assignment:"forecast","tseries", and "dplyr". Install
 
 ```{r}
 #Load/install required package here
+library(forecast)
+library(tseries)
+library(dplyr)
+library(here)
+
+#load packages to import Excel files
+library(readxl)
+library(openxlsx)
 
 ```
 
@@ -32,6 +40,20 @@ Consider the data provided in the spreadsheet "Table_10.1_Renewable_Energy_Produ
 
 ```{r}
 #Importing data set
+energy.data <- 
+  read_excel(path = "./Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx", 
+             skip = 12, sheet = 'Monthly Data', col_names = FALSE)
+
+#extract column names
+read_col_names <- 
+  read_excel(path="./Data/Table_10.1_Renewable_Energy_Production_and_Consumption_by_Source.xlsx",
+             skip = 10,n_max = 1, sheet="Monthly Data",col_names=FALSE)
+
+#assign column names
+colnames(energy.data) <- read_col_names
+
+#check first few rows of data
+head(energy.data)
 
 ```
 
@@ -41,6 +63,11 @@ You will work only with the following columns: Total Biomass Energy Production, 
 
 ```{r}
 
+energy.df <- energy.data %>%
+  select(4, 5, 6)
+
+head(energy.df)
+
 ```
 
 
@@ -49,6 +76,8 @@ Transform your data frame in a time series object and specify the starting point
 
 ```{r}
 
+ts.energy <- ts(energy.df, start = c(1973,1), frequency = 12)
+
 ```
 
 
@@ -56,6 +85,24 @@ Transform your data frame in a time series object and specify the starting point
 Compute mean and standard deviation for these three series.
 
 ```{r}
+
+#compute mean for each series
+mean.biomass <- mean(ts.energy[,1])
+mean.renewable <- mean(ts.energy[,2])
+mean.hydro <- mean(ts.energy[,3])
+
+mean.biomass
+mean.renewable
+mean.hydro
+
+#compute standard deviation for each series
+sd.biomass <- sd(ts.energy[,1])
+sd.renewable <- sd(ts.energy[,2])
+sd.hydro <- sd(ts.energy[,3])
+
+sd.biomass
+sd.renewable
+sd.hydro
 
 ```
 
