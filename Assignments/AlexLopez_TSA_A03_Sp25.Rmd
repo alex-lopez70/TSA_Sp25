@@ -224,6 +224,8 @@ print(combined_plots2)
 
 ```
 
+After detrending the series for Total Renewable Energy Production and Hydroelectric Power Consumption, it looks like the ACF and PACF plots did not change very much. There are no major visible differences in their plots compared to those from Q1.
+
 ## Seasonal Component
 
 Set aside the detrended series and consider the original series again from Q1 to answer Q6 to Q8.
@@ -231,13 +233,65 @@ Set aside the detrended series and consider the original series again from Q1 to
 ### Q6
 Just by looking at the time series and the acf plots, do the series seem to have a seasonal trend? No need to run any code to answer your question. Just type in you answer below.
 
+According to the time series and the acf plots, only the Hydroelectric Power Consumption series appears to have a seasonal trend due to the fluctuations and peak values lagged at regular intervals.
+
 ### Q7
 Use function *lm()* to fit a seasonal means model (i.e. using the seasonal dummies) the two time series. Ask R to print the summary of the regression. Interpret the regression output. From the results which series have a seasonal trend? Do the results match you answer to Q6?
+
+```{r}
+#seasonal dummies separately for each time series
+dummies_renewable <- seasonaldummy(ts_energy[, 1])
+dummies_hydro <- seasonaldummy(ts_energy[, 2])
+
+#fit seasonal models for each time series
+seasonal_model_renewable <- lm(ts_energy[, 1] ~ dummies_renewable)
+seasonal_model_hydro <- lm(ts_energy[, 2] ~ dummies_hydro)
+
+summary(seasonal_model_renewable)
+summary(seasonal_model_hydro)
+
+```
 
 ### Q8
 Use the regression coefficients from Q7 to deseason the series. Plot the deseason series and compare with the plots from part Q1. Did anything change?
 
+```{r}
+#deseason Total Renewable Energy Production
+beta0_seasonal_renew <- seasonal_model_renewable$coefficients[1]
+beta1_seasonal_renew <- seasonal_model_renewable$coefficients[2:12]
+
+seas_comp_renew <- array(0,nobs)
+for(i in 1:nobs){
+  seas_comp_renew[i] <- beta0_seasonal_renew + beta1_seasonal_renew %*% dummies_renewable[i,]
+}
+
+deseason_renew <- ts_energy[,1] - seas_comp_renew
+
+ts_deseason_renew <- ts(deseason_renew, start=start(ts_energy), frequency = 12)
+
+autoplot(ts_energy[,1]) +
+  autolayer(ts_deseason_renew,color="red")
+
+#deseason Hydroelectric Power Consumption
+beta0_seasonal_hydro <- seasonal_model_hydro$coefficients[1]
+beta1_seasonal_hydro <- seasonal_model_hydro$coefficients[2:12]
+
+seas_comp_hydro <- array(0,nobs)
+for(i in 1:nobs){
+  seas_comp_hydro[i] <- beta0_seasonal_hydro + beta1_seasonal_hydro %*% dummies_hydro[i,]
+}
+
+deseason_hydro <- ts_energy[,2] - seas_comp_hydro
+
+ts_deseason_hydro <- ts(deseason_hydro, start=start(ts_energy), frequency = 12)
+
+autoplot(ts_energy[,2]) +
+  autolayer(ts_deseason_hydro,color="red")
+```
+
 ### Q9
 Plot ACF and PACF for the deseason series and compare with the plots from Q1. You may use plot_grid() again to get them side by side, but not mandatory. Did the plots change? How?
 
+```{r}
 
+```

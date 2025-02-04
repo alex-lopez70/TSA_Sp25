@@ -203,9 +203,20 @@ Fit trend and seasonal for the other variables HP2, HP3, ...
 Some test only work for non-seasonal data. So let's create another series with yearly averages for inflow.
 
 ```{r}
+iHP <- 6
+
 #Group data in yearly steps instances
+inflow_data_matrix <- matrix(ts_inflow_data[,iHP],byrow=FALSE,nrow=12)
 
+inflow_data_yearly <- colMeans(inflow_data_matrix)
 
+my_year <- c(1931:2010)
+
+inflow_data_yearly <- data.frame(my_year,'inflow_data'=inflow_data_yearly)
+
+ggplot(inflow_data_yearly, aes(x=my_year,y=inflow_data)) +
+  geom_line(color='blue')+
+  geom_smooth(color='red')
 ```
 
 ### Mann Kendall 
@@ -216,7 +227,7 @@ Check for deterministic trend.
 
 #Since I have seasonal data I cannot use the simple MannKendall()
 #another example of functions that need a ts object
-
+summary(SeasonalMannKendall(ts_inflow_data))
 
 #Use yearly date to run Mann Kendall
 
@@ -229,9 +240,13 @@ Also check for deterministic trend, for non-seasonal data only.
 ```{r}
 #Deterministic trend with Spearman Correlation Test
 print("Results from Spearman Correlation")
-
+print(cor(inflow_data_yearly$inflow_data, my_year, method = 'pearson'))
 
 #with cor.test you can get test statistics
+print(cor.test(inflow_data_yearly$inflow_data, my_year, method = 'spearman'))
+
+#p-value < 0.05 so we can conclude a positive trend
+#this confirms the results from the Mann Kendall and Seasonal Mann Kendall tests
 
 ```
 
@@ -242,9 +257,13 @@ Used to detect stochastic trend.
 ```{r}
 #Null hypothesis is that data has a unit root
 print("Results for ADF test/n")
+print(adf.test(ts_inflow_data[,iHP], alternative = 'stationary')) #stationary over stochastic trend
+#p-value < 0.05 so we reject the null hypothesis in favor of the alternative
+#good example of this being 'stationary' over a unit root
 
 #Now let's try the yearly data
 print("Results for ADF test on yearly data/n")
+print(adf.test(inflow_data_yearly$inflow_data, alternative = 'stationary')) #stationary over stochastic trend
 
 ```
 
