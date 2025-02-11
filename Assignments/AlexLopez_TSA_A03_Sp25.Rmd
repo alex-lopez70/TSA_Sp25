@@ -69,17 +69,19 @@ head(energy_df)
 
 ```
 
+\newpage
+
 ##Trend Component
 
 ### Q1
 For each time series, i.e., Renewable Energy Production and Hydroelectric Consumption create three plots: one with time series, one with the ACF and with the PACF. You may use the some code form A2, but I want all the three plots side by side as in a grid.
 (Hint: use function `plot_grid()` from the `cowplot` package)
 
-```{r}
+```{r, fig.height=6, fig.width=10}
 #transform data frame to time series object
 ts_energy <- ts(energy_df, start = c(1973,1), frequency = 12)
 
-#create empty lists to store plots for Renewable Energy and Hydroelectric Power Consumption
+#create lists to store plots for Renewable Energy Production and Hydroelectric Power Consumption
 time_series_plots <- list()
 acf_plots <- list()
 pacf_plots <- list()
@@ -90,18 +92,27 @@ for (i in 1:2) {
   time_series_plots[[i]] <- autoplot(ts_energy[, i]) +
     ggtitle(colnames(ts_energy)[i]) +
     xlab('Year') +
-    ylab('Energy (Trillion Btu)')
+    ylab('Energy (Trillion Btu)') +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12),
+          axis.title.x = element_text(size = 10),
+          axis.title.y = element_text(size = 10))
   
   #ACF
   acf_plots[[i]] <- autoplot(Acf(ts_energy[, i], lag.max = 40, plot = FALSE)) +
-    ggtitle(paste(colnames(ts_energy)[i]))
+    ggtitle(paste(colnames(ts_energy)[i])) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12),
+          axis.title.x = element_text(size = 10),
+          axis.title.y = element_text(size = 10))
   
   #PACF
   pacf_plots[[i]] <- autoplot(Pacf(ts_energy[, i], lag.max = 40, plot = FALSE)) +
-    ggtitle(paste(colnames(ts_energy)[i]))
+    ggtitle(paste(colnames(ts_energy)[i])) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12),
+          axis.title.x = element_text(size = 10),
+          axis.title.y = element_text(size = 10))
 }
 
-# Combine all plots in a grid: Time series, ACF, PACF for each variable side by side
+#combine all plots in a grid
 combined_plots <- plot_grid(
   time_series_plots[[1]], acf_plots[[1]], pacf_plots[[1]],
   time_series_plots[[2]], acf_plots[[2]], pacf_plots[[2]],
@@ -140,7 +151,7 @@ for (i in 1:2) {
   beta0 <- as.numeric(linear_models[[i]]$coefficients[1])  #intercept
   beta1 <- as.numeric(linear_models[[i]]$coefficients[2])  #slope
   
-  #save the coefficients for further analysis
+  #save the coefficients
   coefficients_list[[colnames(ts_energy)[i]]] <- c(Intercept = beta0, Slope = beta1)
 }
 
@@ -154,8 +165,8 @@ According to the summary of the regression of both time series, in January 1973 
 ### Q4
 Use the regression coefficients from Q3 to detrend the series. Plot the detrended series and compare with the plots from Q1. What happened? Did anything change?
 
-```{r}
-#initialize lists to store detrended series
+```{r, fig.height=6, fig.width=10}
+#initialize list to store detrended series
 ts_detrended_list <- list()
 
 for (i in 1:2) {
@@ -174,28 +185,38 @@ for (i in 1:2) {
   
   #store the detrended series for later plotting
   ts_detrended_list[[colnames(ts_energy)[i]]] <- ts_detrended
+  
+  #store linear trends
+  linear_models[[colnames(ts_energy)[i]]] <- ts_linear
 }
+
 
 #plot the original time series and detrended series for comparison
 for (i in 1:2) {
   print(
     autoplot(ts_energy[, i], color = "darkblue") + 
-      autolayer(ts_detrended_list[[colnames(ts_energy)[i]]], color = "green") + 
+      autolayer(ts_detrended_list[[colnames(ts_energy)[i]]], color = "green") +
+      autolayer(linear_models[[colnames(ts_energy)[i]]],color="red") +
       ggtitle(paste(colnames(ts_energy)[i])) +
       xlab("Year") +
-      ylab("Energy (Trillion Btu)")
+      ylab("Energy (Trillion Btu)") +
+      theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+            axis.title.x = element_text(size = 12),
+            axis.title.y = element_text(size = 12))
   )
 }
 
 ```
+
+\newpage
 
 Compared to its time series plot from Q1, the detrended plot for Total Renewable Energy Production appears to have lost its overall increasing trend. In contrast, the fluctuations are still present in the detrended plot for Hydroelectric Power Consumption, when compared to its time series plot from Q1.
 
 ### Q5
 Plot ACF and PACF for the detrended series and compare with the plots from Q1. You may use plot_grid() again to get them side by side, but not mandatory. Did the plots change? How?
 
-```{r}
-
+```{r, fig.height=10, fig.width=10}
+#create lists to store detrended ACF and PACF detrended plots
 acf_plots_detrended <- list()
 pacf_plots_detrended <- list()
 
@@ -203,28 +224,56 @@ for (i in 1:2) {
   #ACF for detrended series
   acf_plots_detrended[[i]] <- autoplot(Acf(ts_detrended_list[[colnames(ts_energy)[i]]], 
                                            lag.max = 40, plot = FALSE)) +
-    ggtitle(paste(colnames(ts_energy)[i]))
+    ggtitle(paste(colnames(ts_energy)[i])) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12),
+          axis.title.x = element_text(size = 10),
+          axis.title.y = element_text(size = 10))
   
   #PACF for detrended series
   pacf_plots_detrended[[i]] <- autoplot(Pacf(ts_detrended_list[[colnames(ts_energy)[i]]],
                                              lag.max = 40, plot = FALSE)) +
-    ggtitle(paste(colnames(ts_energy)[i]))
+    ggtitle(paste(colnames(ts_energy)[i])) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12),
+          axis.title.x = element_text(size = 10),
+          axis.title.y = element_text(size = 10))
 }
 
 #combine all plots in a grid: ACF and PACF for original time series and detrended
-combined_plots2 <- plot_grid(
-  acf_plots[[1]], acf_plots_detrended[[1]],
-  pacf_plots[[1]], pacf_plots_detrended[[1]],
-  acf_plots[[2]], acf_plots_detrended[[2]],
-  pacf_plots[[2]], pacf_plots_detrended[[2]],
-  ncol = 2, align = "v"
+combined_plots2 <- cowplot::plot_grid(
+ plot_grid(
+    acf_plots[[1]], acf_plots_detrended[[1]],
+    pacf_plots[[1]], pacf_plots_detrended[[1]],
+    acf_plots[[2]], acf_plots_detrended[[2]],
+    pacf_plots[[2]], pacf_plots_detrended[[2]],
+    ncol = 2, align = "v"
+  ))
+
+#combine all plots in a grid: ACF and PACF for original time series and detrended
+cowplot_titles2 <- cowplot::plot_grid(
+  ggdraw() + draw_label("Original", fontface = 'bold', size = 18),
+  ggdraw() + draw_label("Detrended", fontface = 'bold', size = 18),
+  ncol = 2
+)
+
+combined_plots2 <- cowplot::plot_grid(
+  cowplot_titles2, 
+  plot_grid(
+    acf_plots[[1]], acf_plots_detrended[[1]],
+    pacf_plots[[1]], pacf_plots_detrended[[1]],
+    acf_plots[[2]], acf_plots_detrended[[2]],
+    pacf_plots[[2]], pacf_plots_detrended[[2]],
+    ncol = 2
+  ),
+  ncol = 1, rel_heights = c(0.1, 1)
 )
 
 print(combined_plots2)
 
 ```
 
-After detrending the series for Total Renewable Energy Production and Hydroelectric Power Consumption, it looks like the ACF and PACF plots did not change very much. There are no major visible differences in their plots compared to those from Q1.
+After detrending the series for Total Renewable Energy Production and Hydroelectric Power Consumption, it looks like the ACF and PACF plots did not change very much. There are no major visible differences in their plots compared to those from Q1. However, regarding Total Renewable Energy Production, there seems to be a minor spike every 12 months in its detrended ACF plot, suggesting some kind of seasonality present.
+
+\newpage
 
 ## Seasonal Component
 
@@ -252,10 +301,12 @@ summary(seasonal_model_hydro)
 
 ```
 
+According to the regression output, only the Hydroelectric Power Consumption series seems to have a seasonal trend, because the p-value for this series is less than 0.05. In contrast, the p-value for the Total Renewable Energy Production series is not less than 0.05, so there is no significance for this series. These results match with the answer to Q6.
+
 ### Q8
 Use the regression coefficients from Q7 to deseason the series. Plot the deseason series and compare with the plots from part Q1. Did anything change?
 
-```{r}
+```{r, fig.height=6, fig.width=10}
 #deseason Total Renewable Energy Production
 beta0_seasonal_renew <- seasonal_model_renewable$coefficients[1]
 beta1_seasonal_renew <- seasonal_model_renewable$coefficients[2:12]
@@ -270,7 +321,12 @@ deseason_renew <- ts_energy[,1] - seas_comp_renew
 ts_deseason_renew <- ts(deseason_renew, start=start(ts_energy), frequency = 12)
 
 autoplot(ts_energy[,1]) +
-  autolayer(ts_deseason_renew,color="red")
+  autolayer(ts_deseason_renew,color="red") +
+  ggtitle(paste(colnames(ts_energy)[1])) +
+  ylab("Energy (Trillion Btu)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12))
 
 #deseason Hydroelectric Power Consumption
 beta0_seasonal_hydro <- seasonal_model_hydro$coefficients[1]
@@ -286,12 +342,70 @@ deseason_hydro <- ts_energy[,2] - seas_comp_hydro
 ts_deseason_hydro <- ts(deseason_hydro, start=start(ts_energy), frequency = 12)
 
 autoplot(ts_energy[,2]) +
-  autolayer(ts_deseason_hydro,color="red")
+  autolayer(ts_deseason_hydro,color="red") +
+  ggtitle(paste(colnames(ts_energy)[2])) +
+  ylab("Energy (Trillion Btu)") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12))
+  
+  
 ```
+
+Compared with its plot from Q1, the Total Renewable Energy Production deseasoned series did not change much, which provides more evidence to this series lacking seasonality. On the other hand, when compared with its plot from Q1, the Hydroelectric Power Consumption series has fewer fluctuations in its deseasoned plot, which supports the hypothesis that this series, before being deseasoned, does have a seasonal component.
 
 ### Q9
 Plot ACF and PACF for the deseason series and compare with the plots from Q1. You may use plot_grid() again to get them side by side, but not mandatory. Did the plots change? How?
 
-```{r}
+```{r, fig.height=10, fig.width=10}
+ts_deseason_list <- list()
+
+ts_deseason_list[[1]] <- ts_deseason_renew
+ts_deseason_list[[2]] <- ts_deseason_hydro
+
+acf_plots_deseasoned <- list()
+pacf_plots_deseasoned <- list()
+
+for (i in 1:2) {
+  #ACF for deseasoned series
+  acf_plots_deseasoned[[i]] <- autoplot(Acf(ts_deseason_list[[i]], 
+                                           lag.max = 40, plot = FALSE)) +
+    ggtitle(paste(colnames(ts_energy)[i])) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12),
+          axis.title.x = element_text(size = 10),
+          axis.title.y = element_text(size = 10))
+  
+  #PACF for deseasoned series
+  pacf_plots_deseasoned[[i]] <- autoplot(Pacf(ts_deseason_list[[i]],
+                                             lag.max = 40, plot = FALSE)) +
+    ggtitle(paste(colnames(ts_energy)[i])) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12),
+          axis.title.x = element_text(size = 10),
+          axis.title.y = element_text(size = 10))
+}
+
+#combine all plots in a grid: ACF and PACF for original time series and deseasoned
+cowplot_titles3 <- cowplot::plot_grid(
+  ggdraw() + draw_label('Original', fontface = 'bold', size = 18),
+  ggdraw() + draw_label('Deseasoned', fontface = 'bold', size = 18),
+  ncol = 2
+)
+
+combined_plots3 <- cowplot::plot_grid(
+  cowplot_titles3, 
+  plot_grid(
+    acf_plots[[1]], acf_plots_deseasoned[[1]],
+    pacf_plots[[1]], pacf_plots_deseasoned[[1]],
+    acf_plots[[2]], acf_plots_deseasoned[[2]],
+    pacf_plots[[2]], pacf_plots_deseasoned[[2]],
+    ncol = 2
+  ),
+  ncol = 1, rel_heights = c(0.1, 1)
+)
+
+print(combined_plots3)
 
 ```
+
+There are no visible changes for the ACF plot of the Total Renewable Energy Production series. The minor spikes at intervals of 12 months seen in its original PACF plot disappeared, however. The fluctuations and spikes (in positive and negative magnitudes) of the original ACF plot of the Hydroelectric Power Consumption series disappeared. Instead, in its deseasoned ACF plot, there is a gradual decline in significance until a sudden minor spike at lag 12, after which the correlation continues to decrease as the lags increase. For this series, the peaks in signifance at regular 12-month intervals disappeared in the deseasoned PACF plot. The very visible and pronounced changes in the deseasoned ACF and PACF plots of this second series suggest, again, that the series is characterized by seasonality.
+
