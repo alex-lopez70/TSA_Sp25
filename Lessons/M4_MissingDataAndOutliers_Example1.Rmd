@@ -112,6 +112,8 @@ sd_inflow <- sd(inflow_random)
 
 cat(mean_inflow,sd_inflow)
 #Note random series has some missing values, that is why we got NAs
+#there are NAs bc of NAs in the trend component due to the moving average -
+#moving average method makes us lose first 6 and last 6 monthly values
 
 #Compute mean and standard deviation without missing values
 mean_inflow <- mean(na.exclude(inflow_random))  #exclude NA or missing observation to compute mean and std
@@ -146,6 +148,7 @@ df_inflow_random <- na.omit(df_inflow_random)
 sum(is.na(df_inflow_random$inflow))
 head(df_inflow_random,10)
 tail(df_inflow_random,10)
+#now begins in july and ends in february
 
 ```
 Data is ready!
