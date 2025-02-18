@@ -29,6 +29,7 @@ library(Kendall)
 library(lubridate)
 library(tidyverse)  #load this package so yon clean the data frame using pipes
 library(openxlsx)
+library(readxl)
 
 ```
 
@@ -61,7 +62,7 @@ theme_set(
   )
 
 ```
-
+\newpage
 ### Q1
 
 For this assignment you will work only with the following columns: Solar Energy Consumption and Wind Energy Consumption. Create a data frame structure with these two time series only and the Date column. Drop the rows with *Not Available* and convert the columns to numeric. You can use filtering to eliminate the initial rows or convert to numeric and then use the drop_na() function. If you are familiar with pipes for data wrangling, try using it!
@@ -94,13 +95,13 @@ Plot the Solar and Wind energy consumption over time using ggplot. Plot each ser
 #Solar Energy Consumption graph
 ggplot(solarwind_consumption_df, aes(x = Month, y = `Solar Energy Consumption`)) +
   geom_line() +
-  labs(y = "Consumption (Trillion Btu)", title = "Solar Energy Consumption") +
+  labs(y = "Trillion Btu", title = "Solar Energy Consumption") +
   scale_x_date(date_breaks = "5 years", date_labels = "%Y")
 
 #Wind Energy Consumption graph
 ggplot(solarwind_consumption_df, aes(x = Month, y = `Wind Energy Consumption`)) +
   geom_line() +  
-  labs(y = "Consumption (Trillion Btu)", title = "Wind Energy Consumption") +
+  labs(y = "Trillion Btu", title = "Wind Energy Consumption") +
   scale_x_date(date_breaks = "5 years", date_labels = "%Y")
 
 ```
@@ -115,7 +116,7 @@ ggplot(solarwind_consumption_df) +
                 color = "Solar")) +
   geom_line(aes(x = Month, y = `Wind Energy Consumption`, 
                 color = "Wind")) +
-  labs(y = "Consumption (Trillion Btu)", 
+  labs(y = "Trillion Btu", 
        title = "Solar and Wind Energy Consumption") +
   scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
   scale_color_manual(values = c("Solar" = "red", "Wind" = "blue")) +
@@ -212,7 +213,28 @@ Apply the `tsclean()` to both series from Q4. Did the function removed any outli
 
 ```{r}
 
+clean_solar_consumption <- tsclean(ts_solarwind_consumption[,2])
+clean_wind_consumption <- tsclean(ts_solarwind_consumption[,3])
+
+#solar original vs clean
+autoplot(clean_solar_consumption, series ="Clean") +
+  autolayer(ts_solarwind_consumption[,2], series ="Raw") +
+  ggtitle('Solar Energy Consumption') +
+  ylab("Trillion Btu") +
+  scale_color_manual(values = c("Clean" = "magenta", "Raw" = "gray")) +
+  guides(color = guide_legend(title = NULL))
+
+#wind original vs clean
+autoplot(clean_wind_consumption, series ="Clean") +
+  autolayer(ts_solarwind_consumption[,3], series ="Raw") +
+  ggtitle('Wind Energy Consumption') +
+  ylab("Trillion Btu") +
+  scale_color_manual(values = c("Clean" = "blue", "Raw" = "gray")) +
+  guides(color = guide_legend(title = NULL))
+
 ```
+
+>Answer: The function removed many outliers from both time series.
 
 ### Q9
 
@@ -220,6 +242,25 @@ Redo number Q8 but now with the time series you created on Q7, i.e., the series 
 
 ```{r}
 
+clean_solar_consumption_filtered <- tsclean(ts_solarwind_consumption_filtered[,2])
+clean_wind_consumption_filtered <- tsclean(ts_solarwind_consumption_filtered[,3])
+
+#solar original vs clean (filtered)
+autoplot(clean_solar_consumption_filtered, series ="Clean") +
+  autolayer(ts_solarwind_consumption_filtered[,2], series ="Raw") +
+  ggtitle('Solar Energy Consumption (2012 Onwards)') +
+  ylab("Trillion Btu") +
+  scale_color_manual(values = c("Clean" = "magenta", "Raw" = "gray")) +
+  guides(color = guide_legend(title = NULL))
+
+#wind original vs clean (filtered)
+autoplot(clean_wind_consumption_filtered, series ="Clean") +
+  autolayer(ts_solarwind_consumption_filtered[,3], series ="Raw") +
+  ggtitle('Wind Energy Consumption (2012 Onwards)') +
+  ylab("Trillion Btu") +
+  scale_color_manual(values = c("Clean" = "blue", "Raw" = "gray")) +
+  guides(color = guide_legend(title = NULL))
+
 ```
 
-> Answer:
+> Answer: Using the data from 2012 onwards, it looks like the function removed three outliers from the solar energy consumption series and one outlier from the wind energy consumption series, a big difference compared to using the function for the data starting from 1984.
