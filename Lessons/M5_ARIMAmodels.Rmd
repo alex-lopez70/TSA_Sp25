@@ -104,6 +104,7 @@ plot_grid(
   autoplot(Pacf(electricity_price_processed$Residential, lag = 40, plot=FALSE),  
                   main = "PACF Residential Electricity Price")
 )
+#AR1 model
 
 ```
 
@@ -127,7 +128,7 @@ The ACF and PACF from the seasonal adjusted series will help you specify compone
 ```{r}
 
 #Creating non-seasonal residential price time series
-deseasonal_residential_price <- 
+deseasonal_residential_price <- seasadj(decompose_residential_price)
   
 
 #Plotting original and deseasoned series
