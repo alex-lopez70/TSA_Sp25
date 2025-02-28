@@ -219,12 +219,16 @@ plot_grid(
 
 Look at the twice differenced series to identify model order. 
 
+non-seasonal = c(0,1,1) or c(1,1,1)
+seasonal = c(0,1,1)
 
 ## Manually fitting seasonal ARIMA to original series
 
 ```{r}
 
-
+SARIMA_manual <- Arima(ts_electricity_price[,"Residential"], order=c(0,1,1), seasonal=c(0,1,1), 
+                   include.drift=FALSE)
+print(SARIMA_manual)
 
 ```
 
