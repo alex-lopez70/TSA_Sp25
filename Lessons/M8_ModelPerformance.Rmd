@@ -204,7 +204,7 @@ row.names(seas_scores) <- c("MEAN", "SNAIVE","SARIMA")
 
 #choose model with lowest RMSE
 best_model_index <- which.min(seas_scores[,"RMSE"])
-cat("The best model by RMSE is:", row.names(seas_scores[best_model_index,]))                       
+cat("The best model by MAPE is:", row.names(seas_scores[best_model_index,]))                       
                             
 ```
 
